@@ -8,8 +8,8 @@ import tile_downloader
 import geo_utils
 from argparse import ArgumentParser
 
-dlng = 2
-dlat = 2
+dlng = 1.5
+dlat = 1.5
 save_path = "./port_downloads/"
 os.makedirs(save_path, exist_ok=True)
 

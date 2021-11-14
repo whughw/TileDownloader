@@ -26,6 +26,8 @@ parser.add_argument(
     '--start', type=int, default=0)
 parser.add_argument(
     '--end', type=int, default=len(loc_list))
+parser.add_argument(
+    '--nproc', type=int, default=8)
 args = parser.parse_args()
 
 datasource = {
@@ -43,7 +45,7 @@ for idx in range(start_idx, end_idx):
         print("{} / {}".format(idx, len(loc_list)))
         lng, lat = loc[1], loc[0]
         d = datasource[args.source]
-        image = tile_downloader.get_poi(lng, lat, dlng=dlng, dlat=dlat, **d)
+        image = tile_downloader.get_poi(lng, lat, dlng=dlng, dlat=dlat, nproc=args.nproc, **d)
         cv2.imencode('.jpg', image)[1].tofile\
             (os.path.join(save_path, "{}_{}.jpg".format(str(idx), d['datasource'])))
     except Exception as e:

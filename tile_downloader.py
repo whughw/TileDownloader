@@ -9,7 +9,6 @@ import tile_utils
 import distance_utils
 from concurrent_helper import run_with_concurrent
 
-nproc = 8
 retry_limit = 10
 timeout = 5
 
@@ -69,7 +68,7 @@ def download(url, headers, x, y, canvas, pbar):
         return -1
     return 0
 
-def get_poi(lng, lat, datasource='google', dlng=0.1, dlat=0.1, zoom=18):
+def get_poi(lng, lat, datasource='google', dlng=0.1, dlat=0.1, zoom=18, nproc=8):
     center_lng = lng
     center_lat = lat
     dlng = distance_utils.lng_km2degree(dis_km=dlng, center_lat=lat)

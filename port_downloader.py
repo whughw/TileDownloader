@@ -45,7 +45,7 @@ for idx in range(start_idx, end_idx):
         print("{} / {}".format(idx, len(loc_list)))
         lng, lat = loc[1], loc[0]
         d = datasource[args.source]
-        image = tile_downloader.get_poi(lng, lat, dlng=dlng, dlat=dlat, nproc=args.nproc, **d)
+        image = tile_downloader.get_poi(lng, lat, dlng_km=dlng, dlat_km=dlat, nproc=args.nproc, **d)
         if image is None:
             print("Skip image {} with too many failures.".format(str(idx)))
             continue

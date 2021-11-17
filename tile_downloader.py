@@ -12,6 +12,8 @@ from concurrent_helper import run_with_concurrent
 retry_limit = 3
 timeout = 2
 
+tile_limit = 2500
+
 def format_url(datasource, tileX, dx, tileY, dy, zoom):
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36',
@@ -68,15 +70,24 @@ def download(url, headers, x, y, canvas, pbar):
         return -1
     return 0
 
-def get_poi(lng, lat, datasource='google', dlng=0.1, dlat=0.1, zoom=18, nproc=8):
+def get_poi(lng, lat, datasource='google', dlng_km=0.1, dlat_km=0.1, zoom=18, nproc=8):
     center_lng = lng
     center_lat = lat
-    dlng = distance_utils.lng_km2degree(dis_km=dlng, center_lat=lat)
-    dlat = distance_utils.lat_km2degree(dis_km=dlat)
+    dlng = distance_utils.lng_km2degree(dis_km=dlng_km, center_lat=lat)
+    dlat = distance_utils.lat_km2degree(dis_km=dlat_km)
     tileX_tl, tileY_tl = tile_utils.lnglatToTile(center_lng - dlng, center_lat + dlat, zoom)
     tileX_br, tileY_br = tile_utils.lnglatToTile(center_lng + dlng, center_lat - dlat, zoom)
     nX = tileX_br - tileX_tl + 1
     nY = tileY_br - tileY_tl + 1
+    while nX * nY > tile_limit:
+        dlng_km -= 0.05
+        dlat_km -= 0.05
+        dlng = distance_utils.lng_km2degree(dis_km=dlng_km, center_lat=lat)
+        dlat = distance_utils.lat_km2degree(dis_km=dlat_km)
+        tileX_tl, tileY_tl = tile_utils.lnglatToTile(center_lng - dlng, center_lat + dlat, zoom)
+        tileX_br, tileY_br = tile_utils.lnglatToTile(center_lng + dlng, center_lat - dlat, zoom)
+        nX = tileX_br - tileX_tl + 1
+        nY = tileY_br - tileY_tl + 1
     canvas = np.zeros((nY*256, nX*256, 3), dtype=np.uint8)
 
     with tqdm(total=nX*nY) as pbar:

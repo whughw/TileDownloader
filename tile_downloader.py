@@ -9,8 +9,8 @@ import tile_utils
 import distance_utils
 from concurrent_helper import run_with_concurrent
 
-retry_limit = 10
-timeout = 5
+retry_limit = 3
+timeout = 2
 
 def format_url(datasource, tileX, dx, tileY, dy, zoom):
     headers = {

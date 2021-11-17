@@ -46,6 +46,9 @@ for idx in range(start_idx, end_idx):
         lng, lat = loc[1], loc[0]
         d = datasource[args.source]
         image = tile_downloader.get_poi(lng, lat, dlng=dlng, dlat=dlat, nproc=args.nproc, **d)
+        if image is None:
+            print("Skip image {} with too many failures.".format(str(idx)))
+            continue
         cv2.imencode('.jpg', image)[1].tofile\
             (os.path.join(save_path, "{}_{}.jpg".format(str(idx), d['datasource'])))
     except Exception as e:

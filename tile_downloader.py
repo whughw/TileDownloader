@@ -73,7 +73,6 @@ def get_poi(lng, lat, datasource='google', dlng=0.1, dlat=0.1, zoom=18, nproc=8)
     center_lat = lat
     dlng = distance_utils.lng_km2degree(dis_km=dlng, center_lat=lat)
     dlat = distance_utils.lat_km2degree(dis_km=dlat)
-    # 仅适用于东北半球！
     tileX_tl, tileY_tl = tile_utils.lnglatToTile(center_lng - dlng, center_lat + dlat, zoom)
     tileX_br, tileY_br = tile_utils.lnglatToTile(center_lng + dlng, center_lat - dlat, zoom)
     nX = tileX_br - tileX_tl + 1
@@ -81,16 +80,22 @@ def get_poi(lng, lat, datasource='google', dlng=0.1, dlat=0.1, zoom=18, nproc=8)
     canvas = np.zeros((nY*256, nX*256, 3), dtype=np.uint8)
 
     with tqdm(total=nX*nY) as pbar:
-        task_list = []
+        failure_count = 0
+        retry_list = []
         for x in range(nX):
+            if x % 4 == 0:
+                task_list = []
             for y in range(nY):
                 url, headers = format_url(datasource, tileX_tl, x, tileY_tl, y, zoom)
                 task_list.append([url, headers, x, y, canvas, pbar])
-        status = run_with_concurrent(download, task_list, "thread", min(nproc, len(task_list)))
-    retry_list = []
-    for i in range(len(status)):
-        if status[i] != 0:
-            retry_list.append(task_list[i])
+            if x % 4 == 0 or x == nX - 1:
+                status = run_with_concurrent(download, task_list, "thread", min(nproc, len(task_list)))
+                for i in range(len(status)):
+                    if status[i] != 0:
+                        retry_list.append(task_list[i])
+                        failure_count += 1
+            if failure_count >= (nX * nY) / 10:
+                return None
     status = run_with_concurrent(download, retry_list, "thread", min(nproc, len(retry_list)))
 
     # cv2.imwrite("{}_{}.jpg".format(datasource, zoom), canvas)

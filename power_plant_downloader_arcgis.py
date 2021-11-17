@@ -23,8 +23,8 @@ datasource = [
               {'datasource': 'arcgis', 'zoom': 19}
               ]
 
-start_idx = 31
-end_idx = 500
+start_idx = 4000
+end_idx = 4500
 
 # for idx in range(resume_idx, len(loc_list)):
 for idx in range(start_idx, end_idx):

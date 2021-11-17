@@ -83,19 +83,15 @@ def get_poi(lng, lat, datasource='google', dlng=0.1, dlat=0.1, zoom=18, nproc=8)
         failure_count = 0
         retry_list = []
         for x in range(nX):
-            if x % 4 == 0:
-                task_list = []
+            task_list = []
             for y in range(nY):
                 url, headers = format_url(datasource, tileX_tl, x, tileY_tl, y, zoom)
                 task_list.append([url, headers, x, y, canvas, pbar])
-            if x % 4 == 0 or x == nX - 1:
-                status = run_with_concurrent(download, task_list, "thread", min(nproc, len(task_list)))
-                for i in range(len(status)):
-                    print(status)
-                    if status[i] != 0:
-                        retry_list.append(task_list[i])
-                        failure_count += 1
-                print(failure_count)
+            status = run_with_concurrent(download, task_list, "thread", min(nproc, len(task_list)))
+            for i in range(len(status)):
+                if status[i] != 0:
+                    retry_list.append(task_list[i])
+                    failure_count += 1
             if failure_count >= (nX * nY) / 10:
                 return None
     status = run_with_concurrent(download, retry_list, "thread", min(nproc, len(retry_list)))

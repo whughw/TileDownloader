@@ -17,7 +17,14 @@ with open("airport_new.csv", mode="r", encoding="utf-8") as f:
     loc_list = csv.reader(f)
     # loc_list = [l.split(",") for l in loc_list[1:]]
     # loc_list = [[l[2], float(l[22]), float(l[23])] for l in loc_list]
-    loc_list = [[float(l[0]), float(l[1])] for l in loc_list]
+    loc_list_ = []
+    for l in loc_list:
+        try:
+            loc_list_.append([float(l[0]), float(l[1])])
+        except:
+            pass
+
+loc_list = loc_list_
 
 parser = ArgumentParser()
 parser.add_argument(

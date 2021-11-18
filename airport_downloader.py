@@ -2,41 +2,55 @@ import requests
 import json
 import os
 import cv2
+import csv
 
 import tile_downloader
 import geo_utils
+from argparse import ArgumentParser
 
 dlng = 2
 dlat = 2
-save_path = "./downloads/"
+save_path = "./airport_downloads/"
 os.makedirs(save_path, exist_ok=True)
 
-with open("world_airport.csv", mode="r") as f:
-    loc_list = f.readlines()
-    loc_list = [l.split(",") for l in loc_list]
-    loc_list = [[l[0], float(l[1]), float(l[2])] for l in loc_list]
+with open("airport_new.csv", mode="r", encoding="utf-8") as f:
+    loc_list = csv.reader(f)
+    # loc_list = [l.split(",") for l in loc_list[1:]]
+    # loc_list = [[l[2], float(l[22]), float(l[23])] for l in loc_list]
+    loc_list = [[float(l[0]), float(l[1])] for l in loc_list]
 
-datasource = [
-              {'datasource': 'google', 'zoom': 19},
-              {'datasource': 'bing', 'zoom': 19},
-              {'datasource': 'arcgis', 'zoom': 19}
-              ]
+parser = ArgumentParser()
+parser.add_argument(
+    '--source', type=str, default=r"google")
+parser.add_argument(
+    '--start', type=int, default=0)
+parser.add_argument(
+    '--end', type=int, default=len(loc_list))
+parser.add_argument(
+    '--nproc', type=int, default=8)
+args = parser.parse_args()
 
-start_idx = 3305
-end_idx = 4000
+datasource = {
+              "google": {'datasource': 'google', 'zoom': 19},
+              "bing": {'datasource': 'bing', 'zoom': 19},
+              "arcgis": {'datasource': 'arcgis', 'zoom': 19}
+}
 
-# for idx in range(resume_idx, len(loc_list)):
+start_idx = args.start
+end_idx = args.end
+
 for idx in range(start_idx, end_idx):
     try:
         loc = loc_list[idx]
-        city = loc[0]
-        print(city)
         print("{} / {}".format(idx, len(loc_list)))
-        lng, lat = loc[2], loc[1]
-        for d in datasource:
-            image = tile_downloader.get_poi(lng, lat, dlng=dlng, dlat=dlat, **d)
-            cv2.imencode('.jpg', image)[1].tofile\
-                (os.path.join(save_path, "{}_{}_{}.jpg".format(city, str(idx), d['datasource'])))
+        lng, lat = loc[1], loc[0]
+        d = datasource[args.source]
+        image = tile_downloader.get_poi(lng, lat, dlng_km=dlng, dlat_km=dlat, nproc=args.nproc, **d)
+        if image is None:
+            print("Skip image {} with too many failures.".format(str(idx)))
+            continue
+        cv2.imencode('.jpg', image)[1].tofile\
+            (os.path.join(save_path, "{}_{}.jpg".format(str(idx), d['datasource'])))
     except Exception as e:
         print(str(e))
         continue

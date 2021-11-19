@@ -12,7 +12,7 @@ from concurrent_helper import run_with_concurrent
 retry_limit = 3
 timeout = 2
 
-tile_limit = 2500
+tile_limit = 4000
 
 def format_url(datasource, tileX, dx, tileY, dy, zoom):
     headers = {

@@ -20,7 +20,7 @@ with open("railway_station.csv", mode="r", encoding="utf-8") as f:
     loc_list_ = []
     for l in loc_list:
         try:
-            loc_list_.append([l[0], float(l[1]), float(l[2])])
+            loc_list_.append([float(l[0]), float(l[1])])
         except:
             pass
 
@@ -51,7 +51,7 @@ for idx in range(start_idx, end_idx):
     try:
         loc = loc_list[idx]
         print("{} / {}".format(idx, len(loc_list)))
-        name, lng, lat = loc[0], loc[2], loc[1]
+        lng, lat = loc[1], loc[0]
         lng, lat = geo_utils.bd09_wgs84(lng, lat)
         d = datasource[args.source]
         image = tile_downloader.get_poi(lng, lat, dlng_km=dlng, dlat_km=dlat, nproc=args.nproc, **d)
@@ -59,7 +59,7 @@ for idx in range(start_idx, end_idx):
             print("Skip image {} with too many failures.".format(str(idx)))
             continue
         cv2.imencode('.jpg', image)[1].tofile\
-            (os.path.join(save_path, "{}_{}_{}.jpg".format(name, str(idx), d['datasource'])))
+            (os.path.join(save_path, "{}_{}.jpg".format(str(idx), d['datasource'])))
     except Exception as e:
         print(str(e))
         continue
